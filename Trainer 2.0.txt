@@ -1,0 +1,7 @@
+Trainer 2.0
+
+-clickable UI using curses lib
+-show what parts of the word were correct
+-have a zen option that goes on forever until you learn them all
+-use google translate to auto translate words for faster typing
+(translate fills in what it thinks it will be when adding words and if you press enter it fills but if you start typing you give in what you want the translation to be)

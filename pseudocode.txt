@@ -1,0 +1,10 @@
+get indexes list
+choose a random one
+pop the chosen one 
+
+
+
+get the mword and word with index
+
+if the input has a / in it:
+    
