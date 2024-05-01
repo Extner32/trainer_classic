@@ -20,12 +20,11 @@ ui = None
 path = None
 chapter = None
 loaded_workbook = False
-index = 0
 savetick = 1
 time_to_save = 0
 correct_words = 0
 wrong_words = 0
-used_indexes = []
+words = []
 words_found = 0
 just_commanded = False
 prev_word = ""
@@ -72,10 +71,11 @@ def saved():
 with open(program_path+"\\"+"settings.txt", 'w', encoding='utf-8') as settings:
     settings.write(str(standard_savetick)+"\n")
     settings.write(str(savetick))
-name = "V⌕!d"
-gsay("473B78", "B0305C", "Titel")
-say("v0.0")
-say("use help for more info")
+
+name = "Trainer Classic"
+gsay("473B78", "B0305C", name)
+say("v0.1")
+#say("use help for more info")
 while True:
     while mode == 0:
         ui = input("\u001b[38;2;165;72;172m> ")
@@ -280,43 +280,50 @@ while True:
     while mode == 1:
         option = input("\u001b[38;2;234;169;77m"+"only repeat previously wrong words(y/n)? ")
 
-        #loads all indexes from words into a list
         if option == "n":
             say("loading...")
-            print()
-            for i in range(0,ws.max_row):
-                used_indexes.append(i)
-        
-        #loads all indexes from words into a list
+            for i in range(1,ws.max_row+1):
+                words.append([ws.cell(row=i, column=2).value, ws.cell(row=i, column=1).value, i])
+
         if option == "y":
             say("loading...")
-            for i in range(0, ws.max_row):
-                if ws.cell(row=i+1, column= 3).value == "wrong" or ws.cell(row=i+1, column= 3).value == None:
-                    used_indexes.append(i)
-        if used_indexes == []:
-            warn("All words are correct!")
-            continue
+            for i in range(1,ws.max_row+1):
+                if ws.cell(row=i, column= 3).value == "wrong" or ws.cell(row=i, column= 3).value == None:
+                    words.append([ws.cell(row=i, column=2).value, ws.cell(row=i, column=1).value, i])
+
+            if words == []:
+                warn("All words are correct!")
+                continue
 
         #randomizes list indexes
-        random.shuffle(used_indexes)
-        for i in range(0, len(used_indexes)):
-            if i % savetick == 0:
+        random.shuffle(words)
+        index = 0
+        increase_index = False
+        while True:
+            if index % savetick == 0:
                 wb.save(path)
                 saved()
-            if just_commanded == False:
-                index = i
-            mword = ws.cell(row=used_indexes[index]+1, column=2).value
-            word = ws.cell(row=used_indexes[index]+1, column=1).value
+            if increase_index:
+                if index < (len(words)-1):
+                    index += 1
+                else:
+                    break
+
+            increase_index = True
+
+            mword = words[index][0]
+            word = words[index][1]
+            file_index = words[index][2]
 
             if correct_words == 0:
                 bar_correct = ""
             else:
-                bar_correct = "█"*(round((correct_words/(len(used_indexes)) * 100)))
+                bar_correct = "█"*(round((correct_words/(len(words)) * 100)))
             
             if  wrong_words == 0:
                 bar_wrong = ""
             else:
-                bar_wrong = "█" * (round((wrong_words/(len(used_indexes)) * 100)))
+                bar_wrong = "█" * (round((wrong_words/(len(words)) * 100)))
             bar_todo = "█"*((100 - (len(bar_correct) + len(bar_wrong))))
 
             os.system("cls")
@@ -330,20 +337,40 @@ while True:
             
             ui = input(f"\u001b[38;2;234;169;77m{mword} > ")
             if "/" in ui:
+                increase_index = False
                 if ui == "/save":
-                    wb.save
+                    wb.save(path)
                     saved()
-                    just_commanded = True
                 if ui == "/quit":
                     os.system('cls')
                     break
+                if ui == "/repeat":
+                    ask_word_again = not ask_word_again
+                if ui == "/edit":
+                    prev_mword = words[index-1][0]
+                    prev_word = words[index-1][1]
+                    prev_file_index = words[index-1][2]
+
+                    inp = input(f"{prev_mword}{split_character}{prev_word}> ")
+                    if split_character in inp:
+                        inp_list = inp.split(split_character)
+                        new_word = inp_list[0]
+                        new_mword = inp_list[1]
+                        ws.cell(row=prev_file_index, column=2, value = str(new_word))
+                        ws.cell(row=prev_file_index, column=1, value = str(new_mword))
+                        
+
+                else:
+                    increase_index = True
+
+                
             else:
                 #right answer
                 if ui == word:
                     print("\033[1A", end="")
                     print("\033[K", end="")
                     print(f"\u001b[38;2;234;169;77m{mword} > {ui}"+"\u001b[38;2;60;163;112m - correct")
-                    ws.cell(row=used_indexes[index]+1, column=3,value="correct")
+                    ws.cell(row=file_index, column=3,value="correct")
                     correct_words += 1
                     prev_word = f"\u001b[38;2;234;169;77m{mword} > {ui}"+"\u001b[38;2;60;163;112m - correct"
 
@@ -352,7 +379,7 @@ while True:
                     print("\033[1A", end="")
                     print("\033[K", end="")
                     print(f"\u001b[38;2;234;169;77m{mword} > {ui}"f"\u001b[38;2;176;48;92m - {word}")
-                    ws.cell(row=used_indexes[index]+1, column=3,value="wrong")
+                    ws.cell(row=file_index, column=3,value="wrong")
                     if ask_word_again:
                         inp = None
                         times_to_ask = 1
@@ -395,7 +422,7 @@ while True:
             index = 0
             correct_words = 0
             wrong_words = 0
-            used_indexes = []
+            words = []
             option = input("\u001b[38;2;234;169;77m"+"repeat(y/n)? ")
             if option == "n".lower():
                 #not breaking out of loop
