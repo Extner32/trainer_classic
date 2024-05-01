@@ -350,18 +350,17 @@ while True:
                     prev_mword = words[index-1][0]
                     prev_word = words[index-1][1]
                     prev_file_index = words[index-1][2]
+                    inp = ""
 
-                    inp = input(f"{prev_mword}{split_character}{prev_word}> ")
-                    if split_character in inp:
-                        inp_list = inp.split(split_character)
-                        new_word = inp_list[0]
-                        new_mword = inp_list[1]
-                        ws.cell(row=prev_file_index, column=2, value = str(new_word))
-                        ws.cell(row=prev_file_index, column=1, value = str(new_mword))
-                        
+                    while split_character not in inp:
+                        inp = input(f"{prev_mword}{split_character}{prev_word}> ")
 
-                else:
-                    increase_index = True
+
+                    inp_list = inp.split(split_character)
+                    new_word = inp_list[0]
+                    new_mword = inp_list[1]
+                    ws.cell(row=prev_file_index, column=2, value = str(new_word))
+                    ws.cell(row=prev_file_index, column=1, value = str(new_mword))
 
                 
             else:
