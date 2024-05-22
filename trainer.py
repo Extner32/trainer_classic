@@ -74,7 +74,7 @@ with open(program_path+"\\"+"settings.txt", 'w', encoding='utf-8') as settings:
 
 name = "Trainer Classic"
 gsay("473B78", "B0305C", name)
-say("v0.1")
+say("v1.2")
 #say("use help for more info")
 while True:
     while mode == 0:
@@ -278,22 +278,29 @@ while True:
                     warn("no next chapter")
             
     while mode == 1:
-        option = input("\u001b[38;2;234;169;77m"+"only repeat previously wrong words(y/n)? ")
+        while True:
+            option = input("\u001b[38;2;234;169;77m"+"only repeat previously wrong words(y/n)? ")
 
-        if option == "n":
-            say("loading...")
-            for i in range(1,ws.max_row+1):
-                words.append([ws.cell(row=i, column=2).value, ws.cell(row=i, column=1).value, i])
-
-        if option == "y":
-            say("loading...")
-            for i in range(1,ws.max_row+1):
-                if ws.cell(row=i, column= 3).value == "wrong" or ws.cell(row=i, column= 3).value == None:
+            if option == "n":
+                say("loading...")
+                for i in range(1,ws.max_row+1):
                     words.append([ws.cell(row=i, column=2).value, ws.cell(row=i, column=1).value, i])
+                break
 
-            if words == []:
-                warn("All words are correct!")
-                continue
+            if option == "y":
+                say("loading...")
+                for i in range(1,ws.max_row+1):
+                    if ws.cell(row=i, column= 3).value == "wrong" or ws.cell(row=i, column= 3).value == None:
+                        words.append([ws.cell(row=i, column=2).value, ws.cell(row=i, column=1).value, i])
+
+                if words == []:
+                    warn("All words are correct!")
+                    
+                break
+            
+            else:
+                warn("invalid input!")
+        
 
         #randomizes list indexes
         random.shuffle(words)
@@ -324,7 +331,7 @@ while True:
                 bar_wrong = ""
             else:
                 bar_wrong = "█" * (round((wrong_words/(len(words)) * 100)))
-            bar_todo = "█"*((100 - (len(bar_correct) + len(bar_wrong))))
+            bar_todo = "."*((100 - (len(bar_correct) + len(bar_wrong))))
 
             os.system("cls")
 
@@ -386,7 +393,7 @@ while True:
                         while times_to_ask > 0:
                             mistake = False
                             for j in range(times_to_ask):
-                                inp = input(f"\u001b[38;2;234;169;77m({j}/{times_to_ask})> ")
+                                inp = input(f"\u001b[38;2;234;169;77m({j+1}/{times_to_ask})> ")
                                 if inp != word:
                                     mistake = True
                                     break
