@@ -68,15 +68,22 @@ def saved():
     print(f"\033[1A", end="")
     print("\033[K", end="")
 
+def create_difficult_sheet():
+    if "difficult" in wb.sheetnames:
+        return
+    ws = wb.create_sheet("difficult")
+    wb.save(path)
+
 with open(program_path+"\\"+"settings.txt", 'w', encoding='utf-8') as settings:
     settings.write(str(standard_savetick)+"\n")
     settings.write(str(savetick))
 
 name = "Trainer Classic"
 gsay("473B78", "B0305C", name)
-say("v1.2")
+say("v1.3")
 #say("use help for more info")
 while True:
+    #select mode
     while mode == 0:
         ui = input("\u001b[38;2;165;72;172m> ")
         print("\033[0m", end = "")
@@ -132,12 +139,6 @@ while True:
             say(f"selected chapter: {chapter}")
             say("use /quit to exit")
             mode = 1
-    
-        if ui == "replace":
-            os.system('cls')
-            say("syntax: word/translation")
-            say("use /quit to exit")
-            mode = 3
             
         if ui == "savetick":
             say(f"current savetick: {savetick}")
@@ -171,6 +172,7 @@ while True:
                     path = str(program_path+"\\"+file)
                     wb = openpyxl.load_workbook(path)
                     all_created_sheets = wb.sheetnames
+                    create_difficult_sheet()
                     loaded_workbook = True
                     completed()
                 else:
@@ -182,6 +184,7 @@ while True:
                         path = str(program_path+"\\"+file_to_create)
                         wb.save(path)
                         wb = openpyxl.load_workbook(path)
+                        create_difficult_sheet()
                         loaded_workbook = True
                         completed()
             #deletes a file
@@ -206,6 +209,7 @@ while True:
                 path = str(program_path+"\\"+file_to_create)
                 wb.save(path)
                 wb = openpyxl.load_workbook(path)
+                create_difficult_sheet()
                 loaded_workbook = True
                 completed()
 
@@ -276,7 +280,8 @@ while True:
 
                 else:
                     warn("no next chapter")
-            
+
+    #learn mode
     while mode == 1:
         while True:
             option = input("\u001b[38;2;234;169;77m"+"only repeat previously wrong words(y/n)? ")
@@ -302,10 +307,10 @@ while True:
                 warn("invalid input!")
         
 
-        #randomizes list indexes
         random.shuffle(words)
         index = 0
         increase_index = False
+        difficult_words = []
         while True:
             if index % savetick == 0:
                 wb.save(path)
@@ -322,16 +327,18 @@ while True:
             word = words[index][1]
             file_index = words[index][2]
 
+            width = os.get_terminal_size()[0]
+
             if correct_words == 0:
                 bar_correct = ""
             else:
-                bar_correct = "█"*(round((correct_words/(len(words)) * 100)))
+                bar_correct = "█"*(round((correct_words/(len(words)) * width)))
             
             if  wrong_words == 0:
                 bar_wrong = ""
             else:
-                bar_wrong = "█" * (round((wrong_words/(len(words)) * 100)))
-            bar_todo = "."*((100 - (len(bar_correct) + len(bar_wrong))))
+                bar_wrong = "█" * (round((wrong_words/(len(words)) * width)))
+            bar_todo = "."*((width - (len(bar_correct) + len(bar_wrong))))
 
             os.system("cls")
 
@@ -368,6 +375,11 @@ while True:
                     new_mword = inp_list[1]
                     ws.cell(row=prev_file_index, column=2, value = str(new_word))
                     ws.cell(row=prev_file_index, column=1, value = str(new_mword))
+
+                if ui == "/diff":
+                    prev_mword = words[index-1][0]
+                    prev_word = words[index-1][1]
+                    difficult_words.append([prev_word, prev_mword])
 
                 
             else:
@@ -416,6 +428,21 @@ while True:
             mode = 0
             break
         else:
+        
+            if len(difficult_words) != 0:
+                print(difficult_words)
+                wb.active = wb["difficult"]
+                ws = wb["difficult"]
+
+                for word in difficult_words:
+                    ws.append(word)
+
+                wb.active = wb[chapter]
+                ws = wb[chapter]
+
+
+
+
             wb.save(path)
             saved()
             if correct_words+wrong_words == 0:
@@ -436,6 +463,7 @@ while True:
                 break
             os.system("cls")
 
+    #add mode
     while mode == 2:
         ui = input("\u001b[38;2;60;163;112m> ")
 
@@ -485,42 +513,6 @@ while True:
             mword = ui_list[1]
             ws.cell(row=index, column=1, value = str(word))
             ws.cell(row=index, column=2, value = str(mword))
-
-    while mode == 3:
-        ui = input("\u001b[38;2;75;91;171mword to replace> ")
-        if ui == "/quit":
-            wb.save
-            saved()
-            break
-        else:
-            for i in range(1, ws.max_row+1):
-                print("does this even work")
-                print(ui, ws.cell(row=i, column=1).value, ws.cell(row=i, column=2).value)
-                if ws.cell(row=i, column=1).value == ui or ws.cell(row=i, column=2).value == ui:
-                    words_to_replace = str(ws.cell(row=i, column= 1).value+split_character+ws.cell(row=i, column= 2).value)
-                    print(words_to_replace)
-                    print(ws.cell(row=i, column=1).value, ws.cell(row=i, column=2).value)
-                    words_found = 1
-                    print("1",words_found)
-                    print(i)
-                    break
-                else:
-                    print(words_found)
-                    warn("no words were found!")
-                    print(i)
-                    words_found = 0
-                    break
-            if words_found == 1:
-                replacing_words = input(f"\u001b[38;12;35;65;24mchanging: {words_to_replace} > ")
-                word_list = replacing_words.split(split_character)
-                word = word_list[0]
-                translation = word_list[1]
-                ws.cell(row=i, column=1, value=word)
-                ws.cell(row=i, column=1, value=translation)
-                wb.save
-                saved()
-            elif words_found == 0:
-                continue
         
     if ui == "quit":
         break
