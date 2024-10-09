@@ -1,12 +1,6 @@
-edit + add to one mode
+-edit + add to one mode
+-duolingo-like streak
+-github cloud backup???
 
-ch nxt for next chapter
-ch sel for selecting chapter
-ch del for deleting chapter
-ch new for new chapter
 
-bk nxt for next book
-bk sel for selecting book
-bk del for deleting book
-bk new for new book
 

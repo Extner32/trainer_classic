@@ -80,7 +80,8 @@ with open(program_path+"\\"+"settings.txt", 'w', encoding='utf-8') as settings:
 
 name = "Trainer Classic"
 gsay("473B78", "B0305C", name)
-say("v1.3")
+say("v1.4")
+warn("UNSUPPORTED VERSION! MAJOR FILE-BREAKING BUGS!")
 #say("use help for more info")
 while True:
     #select mode
@@ -430,12 +431,21 @@ while True:
         else:
         
             if len(difficult_words) != 0:
-                print(difficult_words)
                 wb.active = wb["difficult"]
                 ws = wb["difficult"]
 
+                already_difficult_words = []
+                row = 1
+                while True:
+                    wordpair = [ws.cell(column=1, row=row).value, ws.cell(column=2, row=row).value]
+                    if wordpair == [None, None]:
+                        break
+                    already_difficult_words.append(wordpair)
+                    row += 1
+
                 for word in difficult_words:
-                    ws.append(word)
+                    if word not in already_difficult_words:
+                        ws.append(word)
 
                 wb.active = wb[chapter]
                 ws = wb[chapter]
